@@ -38,12 +38,12 @@ resource "proxmox_vm_qemu" "firewall" {
   bootdisk    = "scsi0"
 
   disk {
-    slot = 0
+    slot = "scsi0"
     # set disk size here. leave it small for testing because expanding the disk takes time.
-    size     = "10G"
-    type     = "scsi"
-    storage  = "SynoNFS1"
-    iothread = 1
+    size    = "10G"
+    type    = "disk"
+    storage = "local-lvm"
+
   }
 
   network {
