@@ -27,9 +27,8 @@ provider "proxmox" {
 
 resource "proxmox_vm_qemu" "firewall" {
   name        = "OPNsenseFW"
-  desc        = "OPNsense Firewall"
+  description = "OPNsense Firewall"
   target_node = "proxmox"
-  iso         = "local:iso/OPNsense-25.7-dvd-amd64.iso"
   os_type     = "Linux"
   cores       = 2
   sockets     = 1
@@ -37,13 +36,24 @@ resource "proxmox_vm_qemu" "firewall" {
   scsihw      = "virtio-scsi-single"
   bootdisk    = "scsi0"
 
+  # Recommended settings
+  onboot = true
+  agent  = 0
+  boot   = "order=ide2;scsi0"
+
   disk {
-    slot = "scsi0"
-    # set disk size here. leave it small for testing because expanding the disk takes time.
+    slot    = "scsi0"
     size    = "10G"
     type    = "disk"
     storage = "local-lvm"
+    discard = true
+  }
 
+  disk {
+    slot    = "ide2"
+    type    = "cdrom"
+    storage = "local"
+    iso     = "local:iso/OPNsense-25.7-dvd-amd64.iso"
   }
 
   network {
@@ -52,8 +62,9 @@ resource "proxmox_vm_qemu" "firewall" {
     bridge = "vmbr0"
   }
 
-  ### or for a PXE boot VM operation
-  # pxe = true
-  # boot = "scsi0;net0"
-  # agent = 0
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
 }
